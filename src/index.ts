@@ -47,10 +47,10 @@ function findWords(req:requirements){
 
 console.log(findWords({
     l1:'',
-    l2:'',
-    l3:'o',
+    l2:'a',
+    l3:'',
     l4:'',
-    l5:'',
-    include:['l','o'],
-    exclude:['b','e','a','n','s','c','i','v','i','f','r']
+    l5:'y',
+    include:['a'],
+    exclude:['b','e','n','s','c','o','l','t','p','m']
 }))
