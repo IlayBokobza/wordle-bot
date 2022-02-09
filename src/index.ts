@@ -1,86 +1,66 @@
 import fs from 'fs'
-import puppeteer from 'puppeteer'
+import puppeteer, { Page } from 'puppeteer'
+import {PageHelper} from './pageHelpers'
 import { findWords, requirements } from './find'
-
-let words:string[] = JSON.parse(fs.readFileSync('./data.json').toString())
-
-async function typeWord(word:string,page:puppeteer.Page){
-    for(let i = 0; i < word.length;i++){
-        const letter = word[i] as puppeteer.KeyInput
-        await page.keyboard.press(letter)
-    }
-}
-
-async function getDataFromGame(page:puppeteer.Page,row:number){
-    return await page.evaluate(() => {
-
-        function parseEvaluation(str:string,i:number){
-            switch(str){
-                case "present":
-                    return "el"+i
-                case "correct":
-                    return "l"+i
-                case "absent":
-                    return "exclude"
-                default:
-                    return ""
-            }
-        }
-        
-        const tilesNode = document!.querySelector("body > game-app")!.shadowRoot!.querySelector(`#board > game-row:nth-child(${1})`)!.shadowRoot!.querySelectorAll("div > game-tile")
-        const tiles = Array.from(tilesNode) as HTMLElement[]
-        const data = tiles.map((e,i) => {
-            return{
-                letter:e.shadowRoot!.querySelector('div')!.textContent!,
-                value:parseEvaluation(e.getAttribute('evaluation')!,i+1)
-            }
-        })
-
-        return data
-    })
-}
-
-function sleep(t:number){
-    return new Promise(resolve => {
-        setTimeout(resolve,t)
-    })
-}
-
-
+    
 (async () => {
-    const broswer = await puppeteer.launch({headless:false})
-    const page = await broswer.newPage()
-    await page.goto('https://wordle.berknation.com/')
-    // await page.waitForSelector('#game')
-    await page.waitForTimeout(1000)
-    await page.click('body')
-    await typeWord('arise',page)
-    await page.keyboard.press('Enter')
-    await sleep(2250)
+    let words:string[] = JSON.parse(fs.readFileSync('./data.json').toString())
+    let [p,b] = await PageHelper.setup()
+    const page = p as puppeteer.Page
+    const broswer = b as puppeteer.Browser
 
+    await PageHelper.nextWord(page)
+    
+    await PageHelper.typeWord('arise',page)
+    await page.keyboard.press('Enter')
+    await PageHelper.sleep(2250)
+    
     let i = 1
+    let data = await PageHelper.getDataFromGame(page,i)
     while(i != -1){
-        const data = await getDataFromGame(page,i)
-        const options:any = {};
+        const options:any = {exclude:[]};
 
         data.forEach(e => {
+            if(e.value == 'exclude'){
+                options.exclude.push(e.letter)
+                return
+            }
+
             options[e.value] = e.letter
         })
 
-        console.log(options)
         words = findWords(options,words)
         const randomIndex = Math.floor(Math.random() * words.length)
         const word = words[randomIndex]
 
-        await typeWord(word,page)
+        // console.log(words)
+        // console.log(options)
+        // console.log({word,randomIndex,length:words.length});
+        // console.log('//////////')
+        
+        //remove last word from list
+        words.splice(randomIndex,1)
+
+        await PageHelper.typeWord(word,page)
         await page.keyboard.press('Enter')
-        await sleep(2250)
-
+        await PageHelper.sleep(2250)
         i++
-
-        //temp
-        if(i == 4){
+        
+        //gets new data from game
+        data = await PageHelper.getDataFromGame(page,i)
+        let isCorrect = true
+        
+        data.forEach(e => {
+            if(!/^l[1-5]/.test(e.value)){
+                isCorrect = false
+            }
+        })
+        
+        if(isCorrect || i == 7){
             i = -1
+            console.log('DONE')
+            await PageHelper.sleep(3000)
+            await broswer.close()
         }
     }
 })()

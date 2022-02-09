@@ -25,3 +25,4 @@ function findMostUniqeWords(words) {
     return out;
 }
 exports.findMostUniqeWords = findMostUniqeWords;
+//# sourceMappingURL=effiectWord.js.map
