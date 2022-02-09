@@ -1,56 +1,86 @@
 import fs from 'fs'
-type requirements = {
-    l1:string,
-    l2:string,
-    l3:string,
-    l4:string,
-    l5:string,
-    include:string[],
-    exclude:string[]
+import puppeteer from 'puppeteer'
+import { findWords, requirements } from './find'
+
+let words:string[] = JSON.parse(fs.readFileSync('./data.json').toString())
+
+async function typeWord(word:string,page:puppeteer.Page){
+    for(let i = 0; i < word.length;i++){
+        const letter = word[i] as puppeteer.KeyInput
+        await page.keyboard.press(letter)
+    }
 }
 
+async function getDataFromGame(page:puppeteer.Page,row:number){
+    return await page.evaluate(() => {
 
-function findWords(req:requirements){
-    const words:string[] = JSON.parse(fs.readFileSync('./data.json').toString())
-    
-    return words.filter(i => {
-        i = i.toLocaleLowerCase()
-        const r1 = i[0] == req.l1 || !req.l1
-        const r2 = i[1] == req.l2 || !req.l2
-        const r3 = i[2] == req.l3 || !req.l3
-        const r4 = i[3] == req.l4 || !req.l4
-        const r5 = i[4] == req.l5 || !req.l5
-
-        if(!r1 || !r2 || !r3 || !r4 || !r5){
-            return false
-        }
-
-        // check for include
-        for(let j = 0;j < req.include.length;j++){
-            const letter = req.include[j]
-            if(!i.includes(letter)){
-                return false
+        function parseEvaluation(str:string,i:number){
+            switch(str){
+                case "present":
+                    return "el"+i
+                case "correct":
+                    return "l"+i
+                case "absent":
+                    return "exclude"
+                default:
+                    return ""
             }
         }
-
-        // check for exclude
-        for(let j = 0;j < req.exclude.length;j++){
-            const letter = req.exclude[j]
-            if(i.includes(letter)){
-                return false
+        
+        const tilesNode = document!.querySelector("body > game-app")!.shadowRoot!.querySelector(`#board > game-row:nth-child(${1})`)!.shadowRoot!.querySelectorAll("div > game-tile")
+        const tiles = Array.from(tilesNode) as HTMLElement[]
+        const data = tiles.map((e,i) => {
+            return{
+                letter:e.shadowRoot!.querySelector('div')!.textContent!,
+                value:parseEvaluation(e.getAttribute('evaluation')!,i+1)
             }
-        }
+        })
 
-        return true
+        return data
     })
 }
 
-console.log(findWords({
-    l1:'',
-    l2:'a',
-    l3:'',
-    l4:'',
-    l5:'y',
-    include:['a'],
-    exclude:['b','e','n','s','c','o','l','t','p','m']
-}))
+function sleep(t:number){
+    return new Promise(resolve => {
+        setTimeout(resolve,t)
+    })
+}
+
+
+(async () => {
+    const broswer = await puppeteer.launch({headless:false})
+    const page = await broswer.newPage()
+    await page.goto('https://wordle.berknation.com/')
+    // await page.waitForSelector('#game')
+    await page.waitForTimeout(1000)
+    await page.click('body')
+    await typeWord('arise',page)
+    await page.keyboard.press('Enter')
+    await sleep(2250)
+
+    let i = 1
+    while(i != -1){
+        const data = await getDataFromGame(page,i)
+        const options:any = {};
+
+        data.forEach(e => {
+            options[e.value] = e.letter
+        })
+
+        console.log(options)
+        words = findWords(options,words)
+        const randomIndex = Math.floor(Math.random() * words.length)
+        const word = words[randomIndex]
+
+        await typeWord(word,page)
+        await page.keyboard.press('Enter')
+        await sleep(2250)
+
+        i++
+
+        //temp
+        if(i == 4){
+            i = -1
+        }
+    }
+})()
