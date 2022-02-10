@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
 const pageHelpers_1 = require("./pageHelpers");
 const find_1 = require("./find");
+//TODO: add option for infinte loop
 (() => __awaiter(void 0, void 0, void 0, function* () {
     let words = JSON.parse(fs_1.default.readFileSync('./data.json').toString());
     let [p, b] = yield pageHelpers_1.PageHelper.setup();
@@ -58,9 +59,12 @@ const find_1 = require("./find");
         });
         if (isCorrect || i == 7) {
             i = -1;
-            console.log('DONE');
-            yield pageHelpers_1.PageHelper.sleep(3000);
-            yield broswer.close();
+            if (isCorrect) {
+                console.log(`Done, The word was: ${word.toUpperCase()}`);
+            }
+            else {
+                console.log('FAIL, Got unlucky');
+            }
         }
     }
 }))();

@@ -2,7 +2,8 @@ import fs from 'fs'
 import puppeteer, { Page } from 'puppeteer'
 import {PageHelper} from './pageHelpers'
 import { findWords, requirements } from './find'
-    
+
+//TODO: add option for infinte loop
 (async () => {
     let words:string[] = JSON.parse(fs.readFileSync('./data.json').toString())
     let [p,b] = await PageHelper.setup()
@@ -58,9 +59,13 @@ import { findWords, requirements } from './find'
         
         if(isCorrect || i == 7){
             i = -1
-            console.log('DONE')
-            await PageHelper.sleep(3000)
-            await broswer.close()
+            
+            if(isCorrect){
+                console.log(`Done, The word was: ${word.toUpperCase()}`)
+            }
+            else{
+                console.log('FAIL, Got unlucky')
+            }
         }
     }
 })()
