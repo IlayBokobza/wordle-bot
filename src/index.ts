@@ -2,15 +2,13 @@ import fs from 'fs'
 import puppeteer, { Page } from 'puppeteer'
 import {PageHelper} from './pageHelpers'
 import { findWords, requirements } from './find'
+import { Log } from './log'
 
-//TODO: add option for infinte loop
-(async () => {
-    let words:string[] = JSON.parse(fs.readFileSync('./data.json').toString())
-    let [p,b] = await PageHelper.setup()
-    const page = p as puppeteer.Page
-    const broswer = b as puppeteer.Browser
-
+async function play(page:puppeteer.Page,words:string[]){
+    Log.reset()
+    
     await PageHelper.nextWord(page)
+    // await page.click('body')
     
     await PageHelper.typeWord('arise',page)
     await page.keyboard.press('Enter')
@@ -34,10 +32,12 @@ import { findWords, requirements } from './find'
         const randomIndex = Math.floor(Math.random() * words.length)
         const word = words[randomIndex]
 
-        // console.log(words)
-        // console.log(options)
-        // console.log({word,randomIndex,length:words.length});
-        // console.log('//////////')
+        // logs
+        Log.add(JSON.stringify(words))
+        Log.add(JSON.stringify(options))
+        Log.add(JSON.stringify({word,randomIndex,length:words.length}));
+        Log.add("##############")
+
         
         //remove last word from list
         words.splice(randomIndex,1)
@@ -57,15 +57,29 @@ import { findWords, requirements } from './find'
             }
         })
         
-        if(isCorrect || i == 7){
+        if(isCorrect || i == 6){
             i = -1
             
             if(isCorrect){
                 console.log(`Done, The word was: ${word.toUpperCase()}`)
+                Log.add(`The words is: ${word}`)
             }
             else{
                 console.log('FAIL, Got unlucky')
             }
         }
+
     }
-})()
+}
+
+async function main(){
+    let words:string[] = JSON.parse(fs.readFileSync('./data.json').toString())
+    let [p] = await PageHelper.setup()
+    const page = p as puppeteer.Page
+    
+    do{
+        await play(page,words)
+    }while(true)
+}
+
+main()

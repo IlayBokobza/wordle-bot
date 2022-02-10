@@ -41,7 +41,7 @@ export class PageHelper{
             const btn = document?.querySelector("body > game-app")?.shadowRoot?.querySelector("#randomize") as HTMLButtonElement
             btn.click()
         })
-        await page.waitForTimeout(1000)
+        await page.waitForTimeout(500)
         await page.click('body')
         await PageHelper.typeWord('arise',page)
     }

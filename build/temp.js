@@ -20,7 +20,7 @@ const words = [
 ];
 const options = { exclude: ['r'], l2: 'u', l3: 'm', l4: 'o', l5: 'r' };
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    const res = yield find_1.findWords(options, words);
+    const res = yield (0, find_1.findWords)(options, words);
     console.log(res);
 }))();
 //# sourceMappingURL=temp.js.map

@@ -57,7 +57,7 @@ class PageHelper {
                 const btn = (_b = (_a = document === null || document === void 0 ? void 0 : document.querySelector("body > game-app")) === null || _a === void 0 ? void 0 : _a.shadowRoot) === null || _b === void 0 ? void 0 : _b.querySelector("#randomize");
                 btn.click();
             });
-            yield page.waitForTimeout(1000);
+            yield page.waitForTimeout(500);
             yield page.click('body');
             yield PageHelper.typeWord('arise', page);
         });
