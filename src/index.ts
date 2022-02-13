@@ -7,10 +7,7 @@ import { Log } from './log'
 async function play(page:puppeteer.Page,words:string[],daily:boolean){
     Log.reset()
     
-    if(daily){
-        await page.click('body')
-    }
-    else{
+    if(!daily){
         await Services.nextWord(page)
     }
     
@@ -18,9 +15,10 @@ async function play(page:puppeteer.Page,words:string[],daily:boolean){
     await page.keyboard.press('Enter')
     await Services.sleep(2250)
     
-    let i = 1
-    let data = await Services.getDataFromGame(page,i)
-    while(i != -1){
+    let data = await Services.getDataFromGame(page,1)
+    let isCorrect = null
+    for(let i = 1;i <= 6;i++){
+        await page.click('body')
         const options:any = {exclude:[]};
 
         data.forEach(e => {
@@ -53,7 +51,7 @@ async function play(page:puppeteer.Page,words:string[],daily:boolean){
         
         //gets new data from game
         data = await Services.getDataFromGame(page,i)
-        let isCorrect = true
+        isCorrect = true
         
         data.forEach(e => {
             if(!/^l[1-5]/.test(e.value)){
@@ -61,18 +59,15 @@ async function play(page:puppeteer.Page,words:string[],daily:boolean){
             }
         })
         
-        if(isCorrect || i == 6){
-            i = -1
-            
-            if(isCorrect){
-                console.log(`Done, The word was: ${word.toUpperCase()}`)
-                Log.add(`The words is: ${word}`)
-            }
-            else{
-                console.log('FAIL, Got unlucky')
-            }
+        if(isCorrect){
+            console.log(`Done, The word was: ${word.toUpperCase()}`)
+            Log.add(`The words is: ${word}`)
         }
 
+    }
+
+    if(!isCorrect){
+        console.log('FAIL, Got unlucky')
     }
 }
 

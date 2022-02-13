@@ -1,4 +1,4 @@
 {
-    "daily":true,
-    "loop":false
+    "daily":false,
+    "loop":true
 }
