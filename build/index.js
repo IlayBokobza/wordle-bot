@@ -13,19 +13,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
-const pageHelpers_1 = require("./pageHelpers");
+const services_1 = require("./services");
 const find_1 = require("./find");
 const log_1 = require("./log");
-function play(page, words) {
+function play(page, words, daily) {
     return __awaiter(this, void 0, void 0, function* () {
         log_1.Log.reset();
-        yield pageHelpers_1.PageHelper.nextWord(page);
-        // await page.click('body')
-        yield pageHelpers_1.PageHelper.typeWord('arise', page);
+        if (daily) {
+            yield page.click('body');
+        }
+        else {
+            yield services_1.Services.nextWord(page);
+        }
+        yield services_1.Services.typeWord('arise', page);
         yield page.keyboard.press('Enter');
-        yield pageHelpers_1.PageHelper.sleep(2250);
+        yield services_1.Services.sleep(2250);
         let i = 1;
-        let data = yield pageHelpers_1.PageHelper.getDataFromGame(page, i);
+        let data = yield services_1.Services.getDataFromGame(page, i);
         while (i != -1) {
             const options = { exclude: [] };
             data.forEach(e => {
@@ -45,12 +49,12 @@ function play(page, words) {
             log_1.Log.add("##############");
             //remove last word from list
             words.splice(randomIndex, 1);
-            yield pageHelpers_1.PageHelper.typeWord(word, page);
+            yield services_1.Services.typeWord(word, page);
             yield page.keyboard.press('Enter');
-            yield pageHelpers_1.PageHelper.sleep(2250);
+            yield services_1.Services.sleep(2250);
             i++;
             //gets new data from game
-            data = yield pageHelpers_1.PageHelper.getDataFromGame(page, i);
+            data = yield services_1.Services.getDataFromGame(page, i);
             let isCorrect = true;
             data.forEach(e => {
                 if (!/^l[1-5]/.test(e.value)) {
@@ -73,11 +77,12 @@ function play(page, words) {
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         let words = JSON.parse(fs_1.default.readFileSync('./data.json').toString());
-        let [p] = yield pageHelpers_1.PageHelper.setup();
+        let [p] = yield services_1.Services.setup();
         const page = p;
+        const settings = services_1.Services.loadSettings();
         do {
-            yield play(page, words);
-        } while (true);
+            yield play(page, words, settings.daily);
+        } while (settings.loop);
     });
 }
 main();

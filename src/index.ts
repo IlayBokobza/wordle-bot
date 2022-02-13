@@ -1,21 +1,25 @@
 import fs from 'fs'
 import puppeteer, { Page } from 'puppeteer'
-import {PageHelper} from './pageHelpers'
+import {Services} from './services'
 import { findWords, requirements } from './find'
 import { Log } from './log'
 
-async function play(page:puppeteer.Page,words:string[]){
+async function play(page:puppeteer.Page,words:string[],daily:boolean){
     Log.reset()
     
-    await PageHelper.nextWord(page)
-    // await page.click('body')
+    if(daily){
+        await page.click('body')
+    }
+    else{
+        await Services.nextWord(page)
+    }
     
-    await PageHelper.typeWord('arise',page)
+    await Services.typeWord('arise',page)
     await page.keyboard.press('Enter')
-    await PageHelper.sleep(2250)
+    await Services.sleep(2250)
     
     let i = 1
-    let data = await PageHelper.getDataFromGame(page,i)
+    let data = await Services.getDataFromGame(page,i)
     while(i != -1){
         const options:any = {exclude:[]};
 
@@ -42,13 +46,13 @@ async function play(page:puppeteer.Page,words:string[]){
         //remove last word from list
         words.splice(randomIndex,1)
 
-        await PageHelper.typeWord(word,page)
+        await Services.typeWord(word,page)
         await page.keyboard.press('Enter')
-        await PageHelper.sleep(2250)
+        await Services.sleep(2250)
         i++
         
         //gets new data from game
-        data = await PageHelper.getDataFromGame(page,i)
+        data = await Services.getDataFromGame(page,i)
         let isCorrect = true
         
         data.forEach(e => {
@@ -74,12 +78,13 @@ async function play(page:puppeteer.Page,words:string[]){
 
 async function main(){
     let words:string[] = JSON.parse(fs.readFileSync('./data.json').toString())
-    let [p] = await PageHelper.setup()
+    let [p] = await Services.setup()
     const page = p as puppeteer.Page
+    const settings = Services.loadSettings()
     
     do{
-        await play(page,words)
-    }while(true)
+        await play(page,words,settings.daily)
+    }while(settings.loop)
 }
 
 main()

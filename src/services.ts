@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer'
+import fs from 'fs'
 
-export class PageHelper{
+export class Services{
     static async typeWord(word:string,page:puppeteer.Page){
         for(let i = 0; i < word.length;i++){
             const letter = word[i] as puppeteer.KeyInput
@@ -43,7 +44,7 @@ export class PageHelper{
         })
         await page.waitForTimeout(500)
         await page.click('body')
-        await PageHelper.typeWord('arise',page)
+        await Services.typeWord('arise',page)
     }
     
      static async setup(){
@@ -58,5 +59,10 @@ export class PageHelper{
         return new Promise(resolve => {
             setTimeout(resolve,t)
         })
+    }
+
+    static loadSettings(){
+        const data:{daily:boolean,loop:boolean} = JSON.parse(fs.readFileSync('settings.json').toString())
+        return data
     }
 }
