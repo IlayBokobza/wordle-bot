@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer'
 import fs from 'fs'
 
+export type settings = {daily:boolean,startWith:string}
 export class Services{
     static async typeWord(word:string,page:puppeteer.Page){
         for(let i = 0; i < word.length;i++){
@@ -47,11 +48,19 @@ export class Services{
         await Services.typeWord(startingWith,page)
     }
     
-     static async setup(){
+     static async setup(settings:settings){
         const broswer = await puppeteer.launch({headless:false})
         const page = await broswer.newPage()
-        await page.goto('https://wordle.berknation.com/')
+        
+        if(settings.daily){
+            await page.goto('https://www.nytimes.com/games/wordle/index.html')
+        }
+        else{
+            await page.goto('https://wordle.berknation.com/')
+        }
+
         await page.waitForTimeout(1000)
+        await page.click('body')
         return [page,broswer]
      }
         
@@ -62,7 +71,7 @@ export class Services{
     }
 
     static loadSettings(){
-        const data:{daily:boolean,loop:boolean,startWith:string} = JSON.parse(fs.readFileSync('settings.json').toString())
+        const data:settings = JSON.parse(fs.readFileSync('settings.json').toString())
         return data
     }
 }

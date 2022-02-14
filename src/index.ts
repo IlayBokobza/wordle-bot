@@ -1,17 +1,17 @@
 import fs from 'fs'
 import puppeteer from 'puppeteer'
-import { Services } from './services'
+import { Services, settings } from './services'
 import { findWords } from './find'
 import { Log } from './log'
 
-async function play(page:puppeteer.Page,words:string[],daily:boolean,startWith:string){
+async function play(page:puppeteer.Page,words:string[],settings:settings){
     Log.reset()
     
-    if(!daily){
-        await Services.nextWord(page,startWith)
+    if(!settings.daily){
+        await Services.nextWord(page,settings.startWith)
     }
     
-    await Services.typeWord(startWith,page)
+    await Services.typeWord(settings.startWith,page)
     await page.keyboard.press('Enter')
     await Services.sleep(2250)
     
@@ -72,13 +72,13 @@ async function play(page:puppeteer.Page,words:string[],daily:boolean,startWith:s
 
 async function main(){
     let words:string[] = JSON.parse(fs.readFileSync('./data.json').toString())
-    let [p] = await Services.setup()
-    const page = p as puppeteer.Page
     const settings = Services.loadSettings()
+    let [p] = await Services.setup(settings)
+    const page = p as puppeteer.Page
     
     do{
-        await play(page,words,settings.daily,settings.startWith)
-    }while(settings.loop)
+        await play(page,words,settings)
+    }while(!settings.daily)
 }
 
 main()

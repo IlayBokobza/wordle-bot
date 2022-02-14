@@ -63,12 +63,18 @@ class Services {
             yield Services.typeWord(startingWith, page);
         });
     }
-    static setup() {
+    static setup(settings) {
         return __awaiter(this, void 0, void 0, function* () {
             const broswer = yield puppeteer_1.default.launch({ headless: false });
             const page = yield broswer.newPage();
-            yield page.goto('https://wordle.berknation.com/');
+            if (settings.daily) {
+                yield page.goto('https://www.nytimes.com/games/wordle/index.html');
+            }
+            else {
+                yield page.goto('https://wordle.berknation.com/');
+            }
             yield page.waitForTimeout(1000);
+            yield page.click('body');
             return [page, broswer];
         });
     }

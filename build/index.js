@@ -16,13 +16,13 @@ const fs_1 = __importDefault(require("fs"));
 const services_1 = require("./services");
 const find_1 = require("./find");
 const log_1 = require("./log");
-function play(page, words, daily, startWith) {
+function play(page, words, settings) {
     return __awaiter(this, void 0, void 0, function* () {
         log_1.Log.reset();
-        if (!daily) {
-            yield services_1.Services.nextWord(page, startWith);
+        if (!settings.daily) {
+            yield services_1.Services.nextWord(page, settings.startWith);
         }
-        yield services_1.Services.typeWord(startWith, page);
+        yield services_1.Services.typeWord(settings.startWith, page);
         yield page.keyboard.press('Enter');
         yield services_1.Services.sleep(2250);
         let data = yield services_1.Services.getDataFromGame(page, 1);
@@ -72,12 +72,12 @@ function play(page, words, daily, startWith) {
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         let words = JSON.parse(fs_1.default.readFileSync('./data.json').toString());
-        let [p] = yield services_1.Services.setup();
-        const page = p;
         const settings = services_1.Services.loadSettings();
+        let [p] = yield services_1.Services.setup(settings);
+        const page = p;
         do {
-            yield play(page, words, settings.daily, settings.startWith);
-        } while (settings.loop);
+            yield play(page, words, settings);
+        } while (!settings.daily);
     });
 }
 main();
