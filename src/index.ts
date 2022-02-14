@@ -1,17 +1,17 @@
 import fs from 'fs'
-import puppeteer, { Page } from 'puppeteer'
-import {Services} from './services'
-import { findWords, requirements } from './find'
+import puppeteer from 'puppeteer'
+import { Services } from './services'
+import { findWords } from './find'
 import { Log } from './log'
 
-async function play(page:puppeteer.Page,words:string[],daily:boolean){
+async function play(page:puppeteer.Page,words:string[],daily:boolean,startWith:string){
     Log.reset()
     
     if(!daily){
-        await Services.nextWord(page)
+        await Services.nextWord(page,startWith)
     }
     
-    await Services.typeWord('arise',page)
+    await Services.typeWord(startWith,page)
     await page.keyboard.press('Enter')
     await Services.sleep(2250)
     
@@ -47,10 +47,9 @@ async function play(page:puppeteer.Page,words:string[],daily:boolean){
         await Services.typeWord(word,page)
         await page.keyboard.press('Enter')
         await Services.sleep(2250)
-        i++
         
         //gets new data from game
-        data = await Services.getDataFromGame(page,i)
+        data = await Services.getDataFromGame(page,i+1)
         isCorrect = true
         
         data.forEach(e => {
@@ -62,8 +61,8 @@ async function play(page:puppeteer.Page,words:string[],daily:boolean){
         if(isCorrect){
             console.log(`Done, The word was: ${word.toUpperCase()}`)
             Log.add(`The words is: ${word}`)
+            break
         }
-
     }
 
     if(!isCorrect){
@@ -78,7 +77,7 @@ async function main(){
     const settings = Services.loadSettings()
     
     do{
-        await play(page,words,settings.daily)
+        await play(page,words,settings.daily,settings.startWith)
     }while(settings.loop)
 }
 

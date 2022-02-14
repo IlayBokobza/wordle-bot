@@ -37,14 +37,14 @@ export class Services{
         },r)
     }
     
-    static async nextWord(page:puppeteer.Page){
+    static async nextWord(page:puppeteer.Page,startingWith:string){
         await page.evaluate(() => {
             const btn = document?.querySelector("body > game-app")?.shadowRoot?.querySelector("#randomize") as HTMLButtonElement
             btn.click()
         })
         await page.waitForTimeout(500)
         await page.click('body')
-        await Services.typeWord('arise',page)
+        await Services.typeWord(startingWith,page)
     }
     
      static async setup(){
@@ -62,7 +62,7 @@ export class Services{
     }
 
     static loadSettings(){
-        const data:{daily:boolean,loop:boolean} = JSON.parse(fs.readFileSync('settings.json').toString())
+        const data:{daily:boolean,loop:boolean,startWith:string} = JSON.parse(fs.readFileSync('settings.json').toString())
         return data
     }
 }

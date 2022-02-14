@@ -51,7 +51,7 @@ class Services {
             }, r);
         });
     }
-    static nextWord(page) {
+    static nextWord(page, startingWith) {
         return __awaiter(this, void 0, void 0, function* () {
             yield page.evaluate(() => {
                 var _a, _b;
@@ -60,7 +60,7 @@ class Services {
             });
             yield page.waitForTimeout(500);
             yield page.click('body');
-            yield Services.typeWord('arise', page);
+            yield Services.typeWord(startingWith, page);
         });
     }
     static setup() {

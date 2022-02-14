@@ -16,21 +16,19 @@ const fs_1 = __importDefault(require("fs"));
 const services_1 = require("./services");
 const find_1 = require("./find");
 const log_1 = require("./log");
-function play(page, words, daily) {
+function play(page, words, daily, startWith) {
     return __awaiter(this, void 0, void 0, function* () {
         log_1.Log.reset();
-        if (daily) {
-            yield page.click('body');
+        if (!daily) {
+            yield services_1.Services.nextWord(page, startWith);
         }
-        else {
-            yield services_1.Services.nextWord(page);
-        }
-        yield services_1.Services.typeWord('arise', page);
+        yield services_1.Services.typeWord(startWith, page);
         yield page.keyboard.press('Enter');
         yield services_1.Services.sleep(2250);
-        let i = 1;
-        let data = yield services_1.Services.getDataFromGame(page, i);
-        while (i != -1) {
+        let data = yield services_1.Services.getDataFromGame(page, 1);
+        let isCorrect = null;
+        for (let i = 1; i <= 6; i++) {
+            yield page.click('body');
             const options = { exclude: [] };
             data.forEach(e => {
                 if (e.value == 'exclude') {
@@ -52,25 +50,22 @@ function play(page, words, daily) {
             yield services_1.Services.typeWord(word, page);
             yield page.keyboard.press('Enter');
             yield services_1.Services.sleep(2250);
-            i++;
             //gets new data from game
-            data = yield services_1.Services.getDataFromGame(page, i);
-            let isCorrect = true;
+            data = yield services_1.Services.getDataFromGame(page, i + 1);
+            isCorrect = true;
             data.forEach(e => {
                 if (!/^l[1-5]/.test(e.value)) {
                     isCorrect = false;
                 }
             });
-            if (isCorrect || i == 6) {
-                i = -1;
-                if (isCorrect) {
-                    console.log(`Done, The word was: ${word.toUpperCase()}`);
-                    log_1.Log.add(`The words is: ${word}`);
-                }
-                else {
-                    console.log('FAIL, Got unlucky');
-                }
+            if (isCorrect) {
+                console.log(`Done, The word was: ${word.toUpperCase()}`);
+                log_1.Log.add(`The words is: ${word}`);
+                break;
             }
+        }
+        if (!isCorrect) {
+            console.log('FAIL, Got unlucky');
         }
     });
 }
@@ -81,7 +76,7 @@ function main() {
         const page = p;
         const settings = services_1.Services.loadSettings();
         do {
-            yield play(page, words, settings.daily);
+            yield play(page, words, settings.daily, settings.startWith);
         } while (settings.loop);
     });
 }
