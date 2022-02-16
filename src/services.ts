@@ -43,7 +43,7 @@ export class Services{
             const btn = document?.querySelector("body > game-app")?.shadowRoot?.querySelector("#randomize") as HTMLButtonElement
             btn.click()
         })
-        await page.waitForTimeout(500)
+        await Services.sleep(500)
         await page.click('body')
         await Services.typeWord(startingWith,page)
     }

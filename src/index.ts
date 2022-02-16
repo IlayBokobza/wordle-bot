@@ -39,12 +39,12 @@ async function play(page:puppeteer.Page,words:string[],settings:settings){
             const bestwords = findBestWords(words)
             const randomIndex = Math.floor(Math.random() * bestwords.length)
             word = bestwords[randomIndex]
-
-            console.log(`Too many options (${words.length}), using statistically better word: ${word}`)
+            console.log(`Too many options (${words.length}), using statistically better word: "${word}"`)
         }
         else{
             const randomIndex = Math.floor(Math.random() * words.length)
             word = words[randomIndex]
+            console.log(`Choosing "${word}" out of ${words.length} options.`)
         }
 
         // logs

@@ -45,11 +45,12 @@ function play(page, words, settings) {
                 const bestwords = bestword_1.findBestWords(words);
                 const randomIndex = Math.floor(Math.random() * bestwords.length);
                 word = bestwords[randomIndex];
-                console.log(`Too many options (${words.length}), using statistically better word: ${word}`);
+                console.log(`Too many options (${words.length}), using statistically better word: "${word}"`);
             }
             else {
                 const randomIndex = Math.floor(Math.random() * words.length);
                 word = words[randomIndex];
+                console.log(`Choosing "${word}" out of ${words.length} options.`);
             }
             // logs
             log_1.Log.add(JSON.stringify(words));
