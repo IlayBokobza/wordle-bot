@@ -16,6 +16,7 @@ const fs_1 = __importDefault(require("fs"));
 const services_1 = require("./services");
 const find_1 = require("./find");
 const log_1 = require("./log");
+const bestword_1 = require("./bestword");
 function play(page, words, settings) {
     return __awaiter(this, void 0, void 0, function* () {
         log_1.Log.reset();
@@ -27,7 +28,8 @@ function play(page, words, settings) {
         yield services_1.Services.sleep(2250);
         let data = yield services_1.Services.getDataFromGame(page, 1);
         let isCorrect = null;
-        for (let i = 1; i <= 6; i++) {
+        let secondWord = null;
+        for (let i = 1; i <= 5; i++) {
             yield page.click('body');
             const options = { exclude: [] };
             data.forEach(e => {
@@ -37,16 +39,22 @@ function play(page, words, settings) {
                 }
                 options[e.value] = e.letter;
             });
-            words = (0, find_1.findWords)(options, words);
-            const randomIndex = Math.floor(Math.random() * words.length);
-            const word = words[randomIndex];
+            words = find_1.findWords(options, words);
+            let word = "";
+            if (words.length >= 20) {
+                const bestwords = bestword_1.findBestWords(words);
+                const randomIndex = Math.floor(Math.random() * bestwords.length);
+                word = bestwords[randomIndex];
+            }
+            else {
+                const randomIndex = Math.floor(Math.random() * words.length);
+                word = words[randomIndex];
+            }
             // logs
             log_1.Log.add(JSON.stringify(words));
             log_1.Log.add(JSON.stringify(options));
-            log_1.Log.add(JSON.stringify({ word, randomIndex, length: words.length }));
+            log_1.Log.add(JSON.stringify({ word, length: words.length }));
             log_1.Log.add("##############");
-            //remove last word from list
-            words.splice(randomIndex, 1);
             yield services_1.Services.typeWord(word, page);
             yield page.keyboard.press('Enter');
             yield services_1.Services.sleep(2250);

@@ -24,7 +24,7 @@ function findWords(req, words) {
         if (!r1 || !r2 || !r3 || !r4 || !r5) {
             return false;
         }
-        //checks excluded letters
+        //checks excluded at specific spots (the yellow ones)
         const er1 = word[0] != req.el1 || !req.el1;
         const er2 = word[1] != req.el2 || !req.el2;
         const er3 = word[2] != req.el3 || !req.el3;

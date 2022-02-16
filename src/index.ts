@@ -3,6 +3,7 @@ import puppeteer from 'puppeteer'
 import { Services, settings } from './services'
 import { findWords } from './find'
 import { Log } from './log'
+import { findBestWords } from './bestword'
 
 async function play(page:puppeteer.Page,words:string[],settings:settings){
     Log.reset()
@@ -17,7 +18,8 @@ async function play(page:puppeteer.Page,words:string[],settings:settings){
     
     let data = await Services.getDataFromGame(page,1)
     let isCorrect = null
-    for(let i = 1;i <= 6;i++){
+    let secondWord = null
+    for(let i = 1;i <= 5;i++){
         await page.click('body')
         const options:any = {exclude:[]};
 
@@ -31,18 +33,24 @@ async function play(page:puppeteer.Page,words:string[],settings:settings){
         })
 
         words = findWords(options,words)
-        const randomIndex = Math.floor(Math.random() * words.length)
-        const word = words[randomIndex]
+        let word = "";
+
+        if(words.length >= 20){
+            const bestwords = findBestWords(words)
+            const randomIndex = Math.floor(Math.random() * bestwords.length)
+            word = bestwords[randomIndex]
+        }
+        else{
+            const randomIndex = Math.floor(Math.random() * words.length)
+            word = words[randomIndex]
+        }
 
         // logs
         Log.add(JSON.stringify(words))
         Log.add(JSON.stringify(options))
-        Log.add(JSON.stringify({word,randomIndex,length:words.length}));
+        Log.add(JSON.stringify({word,length:words.length}));
         Log.add("##############")
 
-        
-        //remove last word from list
-        words.splice(randomIndex,1)
 
         await Services.typeWord(word,page)
         await page.keyboard.press('Enter')
