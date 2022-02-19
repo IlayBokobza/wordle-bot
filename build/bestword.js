@@ -19,13 +19,13 @@ function countUniqueLetters(word) {
     }
     return Object.keys(counts).length;
 }
-function findBestWords(words) {
+function findBestWords(words, onlyUnique) {
     const scores = socreLetters(words);
     let lowest = Number.MAX_SAFE_INTEGER;
     let best = [];
     words.forEach((e) => {
         //skiping if word it doen't have 5 unique lettets
-        if (countUniqueLetters(e) != 5)
+        if (onlyUnique && countUniqueLetters(e) != 5)
             return;
         //finding average
         let average = 0;

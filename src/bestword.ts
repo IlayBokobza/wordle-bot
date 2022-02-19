@@ -22,14 +22,14 @@ function countUniqueLetters(word:string){
     return Object.keys(counts).length
 }
 
-export function findBestWords(words:string[]){
+export function findBestWords(words:string[],onlyUnique:boolean){
     const scores = socreLetters(words)
     let lowest = Number.MAX_SAFE_INTEGER
     let best:any[] = []
 
     words.forEach((e) => {
         //skiping if word it doen't have 5 unique lettets
-        if(countUniqueLetters(e) != 5) return;
+        if(onlyUnique && countUniqueLetters(e) != 5) return;
 
         //finding average
         let average = 0
