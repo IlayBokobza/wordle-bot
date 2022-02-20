@@ -38,34 +38,19 @@ function play(page, words, settings) {
                 }
                 options[e.value] = e.letter;
             });
-            words = find_1.findWords(options, words);
-            let bestwords;
-            if (i == 1) {
-                bestwords = bestword_1.findBestWords(words, true);
+            words = (0, find_1.findWords)(options, words);
+            let word = "";
+            if (words.length >= 20) {
+                const bestwords = (0, bestword_1.findBestWords)(words, true);
+                const randomIndex = Math.floor(Math.random() * bestwords.length);
+                word = bestwords[randomIndex];
+                console.log(`Too many options (${words.length}), using statistically better word: "${word}"`);
             }
             else {
-                bestwords = bestword_1.findBestWords(words, false);
+                const randomIndex = Math.floor(Math.random() * words.length);
+                word = words[randomIndex];
+                console.log(`Choosing "${word}" out of ${words.length} options.`);
             }
-            const randomIndex = Math.floor(Math.random() * bestwords.length);
-            const word = bestwords[randomIndex];
-            if (i == 1) {
-                console.log(`Too many options (${words.length}), using statistically best unique word: "${word}"`);
-            }
-            else {
-                console.log(`Too many options (${words.length}), using statistically best word: "${word}"`);
-            }
-            // let word = "";
-            // if(words.length >= 20){
-            //     const bestwords = findBestWords(words)
-            //     const randomIndex = Math.floor(Math.random() * bestwords.length)
-            //     word = bestwords[randomIndex]
-            //     console.log(`Too many options (${words.length}), using statistically better word: "${word}"`)
-            // }
-            // else{
-            //     const randomIndex = Math.floor(Math.random() * words.length)
-            //     word = words[randomIndex]
-            //     console.log(`Choosing "${word}" out of ${words.length} options.`)
-            // }
             // logs
             log_1.Log.add(JSON.stringify(words));
             log_1.Log.add(JSON.stringify(options));

@@ -32,38 +32,19 @@ async function play(page:puppeteer.Page,words:string[],settings:settings){
         })
 
         words = findWords(options,words)
-        let bestwords;
+        let word = "";
 
-        if(i == 1){
-            bestwords = findBestWords(words,true)
+        if(words.length >= 20){
+            const bestwords = findBestWords(words,true)
+            const randomIndex = Math.floor(Math.random() * bestwords.length)
+            word = bestwords[randomIndex]
+            console.log(`Too many options (${words.length}), using statistically better word: "${word}"`)
         }
         else{
-            bestwords = findBestWords(words,false)
+            const randomIndex = Math.floor(Math.random() * words.length)
+            word = words[randomIndex]
+            console.log(`Choosing "${word}" out of ${words.length} options.`)
         }
-        
-        const randomIndex = Math.floor(Math.random() * bestwords.length)
-        const word = bestwords[randomIndex]
-
-        if(i == 1){
-            console.log(`Too many options (${words.length}), using statistically best unique word: "${word}"`)
-        }
-        else{
-            console.log(`Too many options (${words.length}), using statistically best word: "${word}"`)
-        }
-
-        // let word = "";
-
-        // if(words.length >= 20){
-        //     const bestwords = findBestWords(words)
-        //     const randomIndex = Math.floor(Math.random() * bestwords.length)
-        //     word = bestwords[randomIndex]
-        //     console.log(`Too many options (${words.length}), using statistically better word: "${word}"`)
-        // }
-        // else{
-        //     const randomIndex = Math.floor(Math.random() * words.length)
-        //     word = words[randomIndex]
-        //     console.log(`Choosing "${word}" out of ${words.length} options.`)
-        // }
 
         // logs
         Log.add(JSON.stringify(words))
